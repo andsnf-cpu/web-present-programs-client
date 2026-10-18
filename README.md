@@ -18,6 +18,8 @@ un minuto. Sul computer le pagine si aprono anche con un doppio clic su `index.h
 Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, come
 `style="--accent-l:#2F6E96; --accent-d:#6FB2DE"` (tema chiaro e tema scuro). I pulsanti "Scarica"
 aprono l'ultima release nel repository `-releases` del programma, quindi restano giusti a ogni versione nuova.
+I repository delle release sono privati: il download funziona solo per chi è entrato su GitHub con un account
+che ha l'accesso; tutti gli altri installano da PRO Launcher, con il token inserito dall'amministratore.
 
 ## Aggiungere un tutorial
 
