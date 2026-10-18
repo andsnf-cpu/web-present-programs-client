@@ -1,8 +1,12 @@
-# Pagine dei programmi
+# web-present-programs-client
 
-Una pagina per ogni programma (a cosa serve, cosa fa, dove si scarica) più l'indice con tutti.
-Si aprono con un doppio clic su `index.html`, senza server; per pubblicarle basta copiare la cartella
-intera su un sito (o su GitHub Pages).
+Il sito che presenta i programmi: una pagina per ognuno (a cosa serve, cosa fa, dove si scarica) più l'indice
+con tutti.
+
+**Online:** https://andsnf-cpu.github.io/web-present-programs-client/
+
+Lo pubblica GitHub Pages dal ramo `main`: ogni modifica inviata a GitHub (push) va online da sola dopo circa
+un minuto. Sul computer le pagine si aprono anche con un doppio clic su `index.html`, senza server.
 
 | File | Contenuto |
 |---|---|
