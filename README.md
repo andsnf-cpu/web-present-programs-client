@@ -17,9 +17,10 @@ un minuto. Sul computer le pagine si aprono anche con un doppio clic su `index.h
 
 Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, come
 `style="--accent-l:#2F6E96; --accent-d:#6FB2DE"` (tema chiaro e tema scuro). I pulsanti "Scarica"
-aprono la cartella condivisa su Google Drive con l'ultimo installer di ogni programma (le release su GitHub
-sono private). A ogni nuova versione la cartella si rifà con `pro-launcher/scripts/copia-installer.py` e si
-sostituisce il file su Drive: il link della cartella resta lo stesso.
+(`data-scarica="..."`) scaricano subito l'installer dalla cartella condivisa su Google Drive (le release su
+GitHub sono private). A ogni nuova versione: la cartella si rifà con `pro-launcher/scripts/copia-installer.py`,
+il file nuovo si carica su Drive al posto del vecchio, poi `node strumenti/link-drive.js` rilegge la cartella e
+aggiorna i link (ogni file su Drive ha il suo identificativo).
 
 ## Aggiungere un tutorial
 
