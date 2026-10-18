@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Provision Tour Editor</title>
+  <meta name="description" content="Provision Tour Editor: tour virtuali a 360° e tour fotografici con hotspot, esportati come sito pronto.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800&family=Red+Hat+Mono:wght@500&family=Red+Hat+Text:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="stile.css">
+</head>
+<body class="tinted" style="--accent-l:#C2453B; --accent-d:#F08074">
+  <header class="hero">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Percorso"><a href="index.html">← Tutti i programmi</a></nav>
+      <div class="hero-main">
+        <img class="app-icon" src="img/provision-tour-editor.png" alt="" width="128" height="128">
+        <div>
+          <h1>Provision Tour Editor</h1>
+          <p class="tagline">Tour virtuali a 360° e tour fotografici, pronti da pubblicare.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="https://github.com/andsnf-cpu/provision-tour-editor-releases/releases/latest"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Scarica l'ultima versione</a>
+            <a class="btn ghost" href="pro-launcher.html">Oppure con PRO Launcher</a>
+          </div>
+          <p class="note">Si apre la pagina dell'ultima versione su GitHub: scarica il file con <b>Setup</b> nel nome per installarlo, oppure quello con <b>Portable</b> per usarlo senza installare.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap page">
+    <section class="intro" aria-labelledby="a-cosa-serve">
+      <h2 id="a-cosa-serve">A cosa serve</h2>
+      <p>Con Provision Tour Editor si creano tour virtuali a 360° e tour fotografici 2D: si caricano le foto, si collegano le scene con frecce e punti cliccabili e si esporta un sito pronto, che si apre anche senza internet.</p>
+    </section>
+
+    <div class="cols">
+      <section aria-labelledby="cosa-puoi-fare">
+        <h2 id="cosa-puoi-fare">Cosa puoi fare</h2>
+        <ul class="features">
+          <li><strong>Scene 360° e 2D.</strong> Foto panoramiche e immagini normali nello stesso tour.</li>
+          <li><strong>Hotspot.</strong> Frecce per passare da una scena all'altra, popup con testo formattato, etichette, cambi di visuale e un pulsante Home comune a tutte le scene.</li>
+          <li><strong>Aree cliccabili.</strong> Poligoni disegnati direttamente sulla foto, con icone, colori e anelli animati.</li>
+          <li><strong>Zoom per dispositivo.</strong> Inquadrature diverse per computer, tablet e telefono, scena per scena.</li>
+          <li><strong>Codice e revisione.</strong> SALVA crea una revisione nuova nella cartella del cliente, come <code>1.3.0020_rev5</code>, senza cambiare il codice; ESPORTA passa al codice successivo: <code>1.3.0020</code> diventa <code>2.3.0020</code>.</li>
+          <li><strong>Esportazione veloce.</strong> Una cartella con <code>index.html</code> da aprire con un doppio clic. Le foto 360° sono divise in tasselli a più risoluzioni, così il tour si carica in fretta; intanto puoi continuare a lavorare.</li>
+          <li><strong>Protezione con key.</strong> Se vuoi, l'esportazione genera una key <code>XXXX-XXXX-XXXX-XXXX</code>: il tour pubblicato sul sito si apre solo con quella e i panorami restano cifrati.</li>
+          <li><strong>Anteprima e QR.</strong> Provi il tour dentro il programma e ne generi il codice QR.</li>
+        </ul>
+      </section>
+
+      <aside class="facts" aria-labelledby="in-breve">
+        <h2 id="in-breve">In breve</h2>
+        <dl>
+          <div><dt>Sistema</dt><dd>Windows</dd></div>
+          <div><dt>Installazione</dt><dd>Installer oppure versione portable</dd></div>
+          <div><dt>Accesso</dt><dd>Nome e password, condivisi in ufficio, con codice di recupero</dd></div>
+          <div><dt>Per le scene 360°</dt><dd>Python (i moduli li installa il programma) e Hugin in <code>C:\Program Files\Hugin</code></dd></div>
+          <div><dt>Tour esportato</dt><dd>Una cartella che si apre anche offline; con la key va pubblicato su un sito https</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <section id="tutorial" aria-labelledby="tutorial-title">
+      <h2 id="tutorial-title">Tutorial</h2>
+      <!--
+        Per aggiungere un tutorial copia questo blocco dentro <ol class="tutorial-list"> qui sotto
+        (l'avviso "in arrivo" sparisce da solo appena c'è il primo tutorial):
+
+        <li><a href="tutorial/provision-primo-tour.html">
+          <span class="t-title">Il primo tour 360°</span>
+          <span class="t-desc">Dalle foto panoramiche al tour esportato.</span>
+          <span class="t-meta">10 minuti</span>
+        </a></li>
+      -->
+      <ol class="tutorial-list"></ol>
+      <p class="tutorial-empty">I tutorial di Provision Tour Editor arriveranno qui: guide passo passo, dalle prime scene al tour pubblicato.</p>
+    </section>
+  </main>
+
+  <footer class="wrap site-foot">
+    <p>Altri programmi</p>
+    <nav aria-label="Altri programmi">
+      <a href="editor-pro.html">Editor PRO</a>
+      <a href="qr-studio.html">QR Studio</a>
+      <a href="borin-client-finder.html">Borin Client Finder</a>
+      <a href="pro-launcher.html">PRO Launcher</a>
+      <a href="index.html">Tutti i programmi</a>
+    </nav>
+  </footer>
+</body>
+</html>
