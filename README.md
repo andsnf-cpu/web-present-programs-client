@@ -24,22 +24,13 @@ Gli installer dei programmi **non sono pubblici**: stanno nelle release private 
 scarica PRO Launcher con il token di sola lettura delle release, che l'amministratore inserisce la prima volta.
 Sulle schede dei programmi il pulsante porta a PRO Launcher.
 
-Sul sito si scarica direttamente **solo PRO Launcher**, dalla [release `pro-launcher`](https://github.com/andsnf-cpu/web-present-programs-client/releases/tag/pro-launcher)
-di questo repository (pubblico), con il file sempre con lo stesso nome (`releases/download/pro-launcher/PRO-Launcher-Setup.exe`):
-il link non cambia mai, e `scarica.js` scrive la versione accanto al pulsante. Da solo, senza token, il launcher non
-mostra nessun programma. Dalla stessa release, con il suo `latest.yml`, il launcher si aggiorna da solo (dalla 1.1.0).
+Sul sito si scarica direttamente **solo PRO Launcher**, da [`pro-launcher-releases`](https://github.com/andsnf-cpu/pro-launcher-releases/releases/latest),
+l'unico repository di release pubblico (da solo, senza token, il launcher non mostra nessun programma). I pulsanti
+puntano alla pagina dell'ultima release; `scarica.js` chiede a GitHub l'ultima versione e li trasforma nel link
+diretto all'installer, con la versione accanto. Dopo una nuova versione del launcher non c'è niente da fare qui.
 
-A ogni nuova versione del launcher `strumenti/aggiorna-download.js` copia il suo Setup dalla release privata
-(verificato con lo SHA-256 di GitHub) e il `latest.yml` con il nome fisso del file; i file già uguali non li tocca.
-**Dopo ogni pubblicazione del launcher** conviene lanciarlo subito (qui sotto, "Subito, a mano"): il giro periodico è
-solo una riserva, perché GitHub può ritardare o saltare i workflow pianificati.
-
-- **Da solo**: `.github/workflows/aggiorna-download.yml` lo lancia ogni 10 minuti (ai minuti 4, 14, 24…). Serve il secret
-  `RELEASES_TOKEN` (Settings › Secrets and variables › Actions): lo stesso token di sola lettura delle release che
-  usa PRO Launcher. GitHub sospende i workflow pianificati dopo 60 giorni senza commit nel repository: se succede,
-  si riattiva da Actions › Aggiorna i download › Enable workflow.
-- **Subito, a mano**: `node strumenti/aggiorna-download.js` (usa il token di `gh auth login`), oppure
-  `gh workflow run aggiorna-download.yml -R andsnf-cpu/web-present-programs-client`.
+La release `pro-launcher` di questo repository resta ferma alla 1.1.2: serve solo ai launcher 1.1.0 e 1.1.1, che si
+aggiornavano da lì, per arrivare alla 1.1.2, che si aggiorna da `pro-launcher-releases`. Non va cancellata.
 
 ## Aggiungere un tutorial
 

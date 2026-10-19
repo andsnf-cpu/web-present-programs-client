@@ -1,28 +1,27 @@
-// Scrive accanto ai pulsanti "Scarica" la versione dell'installer, letta dalle release pubbliche di questo sito
-// (le tiene aggiornate strumenti/aggiorna-download.js). Se GitHub non risponde, i pulsanti funzionano lo stesso.
+// I pulsanti "Scarica" di PRO Launcher puntano alla pagina dell'ultima release di pro-launcher-releases (l'unico
+// repository di release pubblico). Qui si chiede a GitHub l'ultima versione: il pulsante diventa il link diretto
+// all'installer e la versione si scrive accanto. Se GitHub non risponde, il pulsante apre la pagina della release.
 (async () => {
-  const CHIAVE = 'versioni-download';
-  let versioni;
+  const CHIAVE = 'pro-launcher-ultima';
+  let ultima;
   try {
     const c = JSON.parse(sessionStorage.getItem(CHIAVE));
-    if (c && Date.now() - c.quando < 10 * 60 * 1000) versioni = c.versioni;
+    if (c && Date.now() - c.quando < 10 * 60 * 1000) ultima = c.ultima;
   } catch { /* senza sessionStorage si rilegge da GitHub */ }
-  if (!versioni) {
+  if (!ultima) {
     try {
-      const res = await fetch('https://api.github.com/repos/andsnf-cpu/web-present-programs-client/releases?per_page=50');
+      const res = await fetch('https://api.github.com/repos/andsnf-cpu/pro-launcher-releases/releases/latest');
       if (!res.ok) return;
-      versioni = {};
-      for (const r of await res.json()) {
-        const v = /(\d+(?:\.\d+)+)\s*$/.exec(r.name || '');
-        if (v) versioni[r.tag_name] = v[1];
-      }
-      try { sessionStorage.setItem(CHIAVE, JSON.stringify({ quando: Date.now(), versioni })); } catch { /* niente */ }
+      const r = await res.json();
+      const setup = (r.assets || []).find(a => /setup.*\.exe$/i.test(a.name));
+      if (!setup) return;
+      ultima = { versione: String(r.tag_name || '').replace(/^v/i, ''), url: setup.browser_download_url };
+      try { sessionStorage.setItem(CHIAVE, JSON.stringify({ quando: Date.now(), ultima })); } catch { /* niente */ }
     } catch { return; }
   }
-  for (const el of document.querySelectorAll('[data-versione]')) {
-    if (versioni[el.dataset.versione]) el.textContent = ` (${versioni[el.dataset.versione]})`;
+  for (const a of document.querySelectorAll('[data-scarica="pro-launcher"]')) {
+    a.href = ultima.url;
+    a.title = `Versione ${ultima.versione}`;
   }
-  for (const a of document.querySelectorAll('[data-scarica]')) {
-    if (versioni[a.dataset.scarica]) a.title = `Versione ${versioni[a.dataset.scarica]}`;
-  }
+  for (const el of document.querySelectorAll('[data-versione="pro-launcher"]')) el.textContent = ` (${ultima.versione})`;
 })();
