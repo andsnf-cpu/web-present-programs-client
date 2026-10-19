@@ -1,10 +1,9 @@
 'use strict';
-// Copia l'ultimo installer (Setup) di ogni programma dalle release private alle release pubbliche di questo
+// Copia l'ultimo installer (Setup) di PRO Launcher dalla release privata alle release pubbliche di questo
 // repository, dove lo scaricano i pulsanti "Scarica" del sito. Ogni programma ha la sua release, con il tag uguale
 // al nome della pagina (pro-launcher, editor-pro, ...) e il file sempre con lo stesso nome: il link non cambia
 // mai, quindi le pagine non vanno toccate. Se il file è già quello giusto (stesso SHA-256) non fa niente.
-// Scrive anche il catalogo programmi.json (release "catalogo"), da cui PRO Launcher legge versioni e installer
-// senza token, e copia latest.yml (con il nome fisso del file) per l'aggiornamento automatico del launcher.
+// Copia anche latest.yml (con il nome fisso del file), da cui PRO Launcher si aggiorna da solo.
 // Uso:  node strumenti/aggiorna-download.js
 // Token: RELEASES_TOKEN legge le release private, GITHUB_TOKEN scrive in questo repository; se mancano si usa
 // quello di `gh auth login`. Su GitHub lo lancia da solo .github/workflows/aggiorna-download.yml.
@@ -15,12 +14,10 @@ const { execFileSync } = require('child_process');
 const OWNER = 'andsnf-cpu';
 const SITO = 'web-present-programs-client';
 // tag della release (data-scarica nelle pagine) -> repository privato, nome, file scaricato dal sito
+// Solo PRO Launcher: gli installer degli altri programmi restano privati (li scarica il launcher, con il token).
+// Il launcher da solo non mostra nessun programma, e da qui si aggiorna anche senza token.
 const PROGRAMMI = [
-  { tag: 'pro-launcher', repo: 'pro-launcher-releases', nome: 'PRO Launcher', file: 'PRO-Launcher-Setup.exe' },
-  { tag: 'editor-pro', repo: 'editor-pro-releases', nome: 'Editor PRO', file: 'Editor-PRO-Setup.exe' },
-  { tag: 'provision-tour-editor', repo: 'provision-tour-editor-releases', nome: 'Provision Tour Editor', file: 'Provision-Tour-Editor-Setup.exe' },
-  { tag: 'qr-studio', repo: 'qr-studio-releases', nome: 'QR Studio', file: 'QR-Studio-Setup.exe' },
-  { tag: 'borin-client-finder', repo: 'borin-client-finder-releases', nome: 'Borin Client Finder', file: 'Borin-Client-Finder-Setup.exe' }
+  { tag: 'pro-launcher', repo: 'pro-launcher-releases', nome: 'PRO Launcher', file: 'PRO-Launcher-Setup.exe' }
 ];
 
 let ghToken;
@@ -66,9 +63,8 @@ async function carica(sito, nome, buf, hash) {
 }
 
 const releaseDelSito = tag => api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/tags/${tag}`, { ok404: true });
-const urlDelSito = (tag, nome) => `https://github.com/${OWNER}/${SITO}/releases/download/${tag}/${nome}`;
 
-/** Copia l'ultimo Setup di un programma (se è cambiato) e restituisce la sua voce del catalogo */
+/** Copia l'ultimo Setup di un programma (se è cambiato) e il suo latest.yml */
 async function aggiorna(p) {
   const rel = await api(LEGGE, `/repos/${OWNER}/${p.repo}/releases/latest`);
   const asset = rel.assets.find(a => /setup.*\.exe$/i.test(a.name));
@@ -78,13 +74,12 @@ async function aggiorna(p) {
 
   let sito = await releaseDelSito(p.tag);
   const presente = sito && sito.assets.find(a => a.name === p.file);
-  let hash = voluto, size = asset.size;
+  let hash = voluto;
   if (presente && voluto && presente.digest === `sha256:${voluto}`) {
     console.log(`= ${p.nome.padEnd(22)} ${versione} già sul sito`);
   } else {
     const buf = await scarica(asset);
     hash = sha256(buf);
-    size = buf.length;
     if (voluto && hash !== voluto) throw new Error(`${asset.name}: SHA-256 diverso da quello di GitHub, non lo pubblico`);
     const info = {
       name: `${p.nome} ${versione}`,
@@ -117,54 +112,12 @@ async function aggiorna(p) {
       console.log(`+ ${p.nome.padEnd(22)} latest.yml per l'aggiornamento automatico`);
     }
   }
-
-  // la descrizione dei repository -releases ("Solo gli installer di…") non dice cosa fa il programma: si lascia vuota
-  const descr = ((await api(LEGGE, `/repos/${OWNER}/${p.repo}`)).description || '').trim();
-  return {
-    id: p.tag, name: p.nome, repo: `${OWNER}/${p.repo}`, description: /^solo gli installer/i.test(descr) ? '' : descr,
-    version: versione, tag: rel.tag_name, publishedAt: rel.published_at, notes: rel.body || '',
-    file: { name: asset.name, url: urlDelSito(p.tag, p.file), size, sha256: hash }
-  };
-}
-
-/**
- * Il catalogo che legge PRO Launcher (senza token): per ogni programma versione, note e installer sul sito.
- * Sta nella release "catalogo" di questo repository, sempre con lo stesso nome. Si riscrive solo se cambia.
- */
-async function scriviCatalogo(voci) {
-  const CATALOGO = 'catalogo', FILE = 'programmi.json';
-  let rel = await releaseDelSito(CATALOGO);
-  const vecchio = rel && rel.assets.find(a => a.name === FILE);
-  let prima = null;
-  if (vecchio) {
-    try { prima = await (await fetch(urlDelSito(CATALOGO, FILE))).json(); } catch { /* catalogo illeggibile: si riscrive */ }
-  }
-  // un programma che stavolta non si è potuto leggere tiene la voce di prima, che punta ancora a un file valido
-  const tutte = PROGRAMMI.map(p => voci[p.tag] || (prima && (prima.programs || []).find(x => x.id === p.tag))).filter(Boolean);
-  if (prima && JSON.stringify(prima.programs) === JSON.stringify(tutte)) {
-    console.log(`= catalogo ${FILE} già aggiornato`);
-    return;
-  }
-  const buf = Buffer.from(JSON.stringify({ version: 1, updatedAt: new Date().toISOString(), programs: tutte }, null, 2) + '\n');
-  if (!rel) {
-    rel = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases`, {
-      method: 'POST', body: JSON.stringify({
-        tag_name: CATALOGO, target_commitish: 'main', name: 'Catalogo dei programmi', make_latest: 'false',
-        body: `\`${FILE}\`: per ogni programma l'ultima versione, le note e l'installer su questo sito, con lo SHA-256. ` +
-          'Lo legge PRO Launcher per sapere cosa c\'è di nuovo, senza token. Si aggiorna da solo insieme agli installer.'
-      })
-    });
-  }
-  await carica(rel, FILE, buf, sha256(buf));
-  console.log(`+ catalogo ${FILE} aggiornato (${tutte.map(v => `${v.name} ${v.version}`).join(', ')})`);
 }
 
 (async () => {
   let errori = 0;
-  const voci = {};
   for (const p of PROGRAMMI) {
-    try { voci[p.tag] = await aggiorna(p); } catch (e) { errori++; console.error(`! ${p.nome}: ${e.message}`); }
+    try { await aggiorna(p); } catch (e) { errori++; console.error(`! ${p.nome}: ${e.message}`); }
   }
-  try { await scriviCatalogo(voci); } catch (e) { errori++; console.error(`! catalogo: ${e.message}`); }
   if (errori) process.exit(1);
 })();
