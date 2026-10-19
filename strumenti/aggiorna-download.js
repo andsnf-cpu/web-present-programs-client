@@ -1,0 +1,105 @@
+'use strict';
+// Copia l'ultimo installer (Setup) di ogni programma dalle release private alle release pubbliche di questo
+// repository, dove lo scaricano i pulsanti "Scarica" del sito. Ogni programma ha la sua release, con il tag uguale
+// al nome della pagina (pro-launcher, editor-pro, ...) e il file sempre con lo stesso nome: il link non cambia
+// mai, quindi le pagine non vanno toccate. Se il file è già quello giusto (stesso SHA-256) non fa niente.
+// Uso:  node strumenti/aggiorna-download.js
+// Token: RELEASES_TOKEN legge le release private, GITHUB_TOKEN scrive in questo repository; se mancano si usa
+// quello di `gh auth login`. Su GitHub lo lancia da solo .github/workflows/aggiorna-download.yml.
+
+const crypto = require('crypto');
+const { execFileSync } = require('child_process');
+
+const OWNER = 'andsnf-cpu';
+const SITO = 'web-present-programs-client';
+// tag della release (data-scarica nelle pagine) -> repository privato, nome, file scaricato dal sito
+const PROGRAMMI = [
+  { tag: 'pro-launcher', repo: 'pro-launcher-releases', nome: 'PRO Launcher', file: 'PRO-Launcher-Setup.exe' },
+  { tag: 'editor-pro', repo: 'editor-pro-releases', nome: 'Editor PRO', file: 'Editor-PRO-Setup.exe' },
+  { tag: 'provision-tour-editor', repo: 'provision-tour-editor-releases', nome: 'Provision Tour Editor', file: 'Provision-Tour-Editor-Setup.exe' },
+  { tag: 'qr-studio', repo: 'qr-studio-releases', nome: 'QR Studio', file: 'QR-Studio-Setup.exe' },
+  { tag: 'borin-client-finder', repo: 'borin-client-finder-releases', nome: 'Borin Client Finder', file: 'Borin-Client-Finder-Setup.exe' }
+];
+
+let ghToken;
+const tokenGh = () => ghToken ??= execFileSync('gh', ['auth', 'token'], { encoding: 'utf8' }).trim();
+const LEGGE = process.env.RELEASES_TOKEN || tokenGh();
+const SCRIVE = process.env.GITHUB_TOKEN || tokenGh();
+
+async function api(token, url, { method = 'GET', body, headers = {}, ok404 = false } = {}) {
+  const res = await fetch(url.startsWith('http') ? url : `https://api.github.com${url}`, {
+    method,
+    headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'User-Agent': SITO, ...headers },
+    body
+  });
+  if (ok404 && res.status === 404) return null;
+  if (!res.ok) throw new Error(`${method} ${url}: GitHub ha risposto ${res.status} ${await res.text()}`);
+  return res.status === 204 ? null : res.json();
+}
+
+// Il file di una release privata: GitHub rimanda a un link firmato, dove il token non va mandato.
+async function scarica(asset) {
+  const res = await fetch(asset.url, {
+    headers: { Accept: 'application/octet-stream', Authorization: `Bearer ${LEGGE}`, 'User-Agent': SITO },
+    redirect: 'manual'
+  });
+  const dove = res.headers.get('location');
+  const file = dove ? await fetch(dove) : res;
+  if (!file.ok) throw new Error(`download di ${asset.name}: ${file.status}`);
+  return Buffer.from(await file.arrayBuffer());
+}
+
+const sha256 = buf => crypto.createHash('sha256').update(buf).digest('hex');
+const data = iso => new Date(iso).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' });
+
+async function aggiorna(p) {
+  const rel = await api(LEGGE, `/repos/${OWNER}/${p.repo}/releases/latest`);
+  const asset = rel.assets.find(a => /setup.*\.exe$/i.test(a.name));
+  if (!asset) throw new Error(`${p.repo} ${rel.tag_name}: nessun Setup .exe nella release`);
+  const voluto = (asset.digest || '').replace(/^sha256:/, '');
+  const versione = rel.tag_name.replace(/^v/, '');
+
+  let sito = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/tags/${p.tag}`, { ok404: true });
+  const presente = sito && sito.assets.find(a => a.name === p.file);
+  if (presente && voluto && presente.digest === `sha256:${voluto}`) {
+    console.log(`= ${p.nome.padEnd(22)} ${versione} già sul sito`);
+    return false;
+  }
+
+  const buf = await scarica(asset);
+  const hash = sha256(buf);
+  if (voluto && hash !== voluto) throw new Error(`${asset.name}: SHA-256 diverso da quello di GitHub, non lo pubblico`);
+
+  const info = {
+    name: `${p.nome} ${versione}`,
+    body: `Ultima versione di **${p.nome}**: ${versione}, pubblicata il ${data(rel.published_at)}.\n\n` +
+      `Il file si chiama sempre \`${p.file}\`, così il link del sito non cambia; a ogni nuova versione viene ` +
+      `sostituito da solo.\n\nSHA-256: \`${hash}\``,
+    make_latest: 'false'
+  };
+  if (!sito) {
+    sito = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases`, {
+      method: 'POST', body: JSON.stringify({ tag_name: p.tag, target_commitish: 'main', ...info })
+    });
+  }
+  // Si carica con un nome provvisorio e poi si rinomina: il link resta senza file solo per un attimo.
+  const provvisorio = `${p.file}.nuovo`;
+  for (const a of sito.assets) if (a.name !== p.file) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${a.id}`, { method: 'DELETE' });
+  const nuovo = await api(SCRIVE, `https://uploads.github.com/repos/${OWNER}/${SITO}/releases/${sito.id}/assets?name=${encodeURIComponent(provvisorio)}`, {
+    method: 'POST', body: buf, headers: { 'Content-Type': 'application/octet-stream' }
+  });
+  if (nuovo.digest && nuovo.digest !== `sha256:${hash}`) throw new Error(`${p.file}: il file caricato non corrisponde`);
+  if (presente) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${presente.id}`, { method: 'DELETE' });
+  await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${nuovo.id}`, { method: 'PATCH', body: JSON.stringify({ name: p.file }) });
+  await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/${sito.id}`, { method: 'PATCH', body: JSON.stringify(info) });
+  console.log(`+ ${p.nome.padEnd(22)} ${versione} pubblicata (${(buf.length / 1e6).toFixed(0)} MB, SHA-256 verificato)`);
+  return true;
+}
+
+(async () => {
+  let errori = 0;
+  for (const p of PROGRAMMI) {
+    try { await aggiorna(p); } catch (e) { errori++; console.error(`! ${p.nome}: ${e.message}`); }
+  }
+  if (errori) process.exit(1);
+})();

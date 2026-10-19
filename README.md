@@ -16,11 +16,25 @@ un minuto. Sul computer le pagine si aprono anche con un doppio clic su `index.h
 | `img/` | Le icone dei programmi, prese dai loro repository |
 
 Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, come
-`style="--accent-l:#2F6E96; --accent-d:#6FB2DE"` (tema chiaro e tema scuro). I pulsanti "Scarica"
-(`data-scarica="..."`) scaricano subito l'installer dalla cartella condivisa su Google Drive (le release su
-GitHub sono private). A ogni nuova versione: la cartella si rifà con `pro-launcher/scripts/copia-installer.py`,
-il file nuovo si carica su Drive al posto del vecchio, poi `node strumenti/link-drive.js` rilegge la cartella e
-aggiorna i link (ogni file su Drive ha il suo identificativo).
+`style="--accent-l:#2F6E96; --accent-d:#6FB2DE"` (tema chiaro e tema scuro).
+
+## Download
+
+I pulsanti "Scarica" (`data-scarica="..."`) scaricano l'installer dalle [release di questo
+repository](https://github.com/andsnf-cpu/web-present-programs-client/releases), che è pubblico (le release dei
+programmi sono private). Ogni programma ha la sua release, con il tag uguale al `data-scarica` e il file sempre con
+lo stesso nome, per esempio `releases/download/pro-launcher/PRO-Launcher-Setup.exe`: il link non cambia mai.
+`scarica.js` legge la versione dalle release e la scrive accanto al pulsante.
+
+A ogni nuova versione di un programma `strumenti/aggiorna-download.js` copia il suo Setup dalla release privata
+(verificato con lo SHA-256 di GitHub) al posto di quello vecchio; i file già uguali non li tocca.
+
+- **Da solo**: `.github/workflows/aggiorna-download.yml` lo lancia ogni 10 minuti. Serve il secret
+  `RELEASES_TOKEN` (Settings › Secrets and variables › Actions): lo stesso token di sola lettura delle release che
+  usa PRO Launcher. GitHub sospende i workflow pianificati dopo 60 giorni senza commit nel repository: se succede,
+  si riattiva da Actions › Aggiorna i download › Enable workflow.
+- **Subito, a mano**: `node strumenti/aggiorna-download.js` (usa il token di `gh auth login`), oppure
+  `gh workflow run aggiorna-download.yml -R andsnf-cpu/web-present-programs-client`.
 
 ## Aggiungere un tutorial
 
