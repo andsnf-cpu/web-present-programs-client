@@ -3,6 +3,8 @@
 // repository, dove lo scaricano i pulsanti "Scarica" del sito. Ogni programma ha la sua release, con il tag uguale
 // al nome della pagina (pro-launcher, editor-pro, ...) e il file sempre con lo stesso nome: il link non cambia
 // mai, quindi le pagine non vanno toccate. Se il file è già quello giusto (stesso SHA-256) non fa niente.
+// Scrive anche il catalogo programmi.json (release "catalogo"), da cui PRO Launcher legge versioni e installer
+// senza token, e copia latest.yml (con il nome fisso del file) per l'aggiornamento automatico del launcher.
 // Uso:  node strumenti/aggiorna-download.js
 // Token: RELEASES_TOKEN legge le release private, GITHUB_TOKEN scrive in questo repository; se mancano si usa
 // quello di `gh auth login`. Su GitHub lo lancia da solo .github/workflows/aggiorna-download.yml.
@@ -52,6 +54,21 @@ async function scarica(asset) {
 const sha256 = buf => crypto.createHash('sha256').update(buf).digest('hex');
 const data = iso => new Date(iso).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' });
 
+/** Carica un file nella release del sito: prima con un nome provvisorio, poi lo rinomina al posto del vecchio */
+async function carica(sito, nome, buf, hash) {
+  const vecchio = sito.assets.find(a => a.name === nome);
+  const nuovo = await api(SCRIVE, `https://uploads.github.com/repos/${OWNER}/${SITO}/releases/${sito.id}/assets?name=${encodeURIComponent(nome + '.nuovo')}`, {
+    method: 'POST', body: buf, headers: { 'Content-Type': 'application/octet-stream' }
+  });
+  if (nuovo.digest && nuovo.digest !== `sha256:${hash}`) throw new Error(`${nome}: il file caricato non corrisponde`);
+  if (vecchio) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${vecchio.id}`, { method: 'DELETE' });
+  await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${nuovo.id}`, { method: 'PATCH', body: JSON.stringify({ name: nome }) });
+}
+
+const releaseDelSito = tag => api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/tags/${tag}`, { ok404: true });
+const urlDelSito = (tag, nome) => `https://github.com/${OWNER}/${SITO}/releases/download/${tag}/${nome}`;
+
+/** Copia l'ultimo Setup di un programma (se è cambiato) e restituisce la sua voce del catalogo */
 async function aggiorna(p) {
   const rel = await api(LEGGE, `/repos/${OWNER}/${p.repo}/releases/latest`);
   const asset = rel.assets.find(a => /setup.*\.exe$/i.test(a.name));
@@ -59,47 +76,95 @@ async function aggiorna(p) {
   const voluto = (asset.digest || '').replace(/^sha256:/, '');
   const versione = rel.tag_name.replace(/^v/, '');
 
-  let sito = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/tags/${p.tag}`, { ok404: true });
+  let sito = await releaseDelSito(p.tag);
   const presente = sito && sito.assets.find(a => a.name === p.file);
+  let hash = voluto, size = asset.size;
   if (presente && voluto && presente.digest === `sha256:${voluto}`) {
     console.log(`= ${p.nome.padEnd(22)} ${versione} già sul sito`);
-    return false;
+  } else {
+    const buf = await scarica(asset);
+    hash = sha256(buf);
+    size = buf.length;
+    if (voluto && hash !== voluto) throw new Error(`${asset.name}: SHA-256 diverso da quello di GitHub, non lo pubblico`);
+    const info = {
+      name: `${p.nome} ${versione}`,
+      body: `Ultima versione di **${p.nome}**: ${versione}, pubblicata il ${data(rel.published_at)}.\n\n` +
+        `Il file si chiama sempre \`${p.file}\`, così il link del sito non cambia; a ogni nuova versione viene ` +
+        `sostituito da solo.\n\nSHA-256: \`${hash}\``,
+      make_latest: 'false'
+    };
+    if (!sito) {
+      sito = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases`, {
+        method: 'POST', body: JSON.stringify({ tag_name: p.tag, target_commitish: 'main', ...info })
+      });
+    }
+    // restano solo il Setup e latest.yml; il resto (per esempio un .nuovo rimasto da un errore) si toglie
+    for (const a of sito.assets) if (![p.file, 'latest.yml'].includes(a.name)) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${a.id}`, { method: 'DELETE' });
+    await carica(sito, p.file, buf, hash);
+    await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/${sito.id}`, { method: 'PATCH', body: JSON.stringify(info) });
+    sito = await releaseDelSito(p.tag);
+    console.log(`+ ${p.nome.padEnd(22)} ${versione} pubblicata (${(buf.length / 1e6).toFixed(0)} MB, SHA-256 verificato)`);
   }
 
-  const buf = await scarica(asset);
-  const hash = sha256(buf);
-  if (voluto && hash !== voluto) throw new Error(`${asset.name}: SHA-256 diverso da quello di GitHub, non lo pubblico`);
+  // latest.yml (per l'aggiornamento automatico di chi lo usa, come PRO Launcher) con il nome fisso del file
+  const yml = rel.assets.find(a => a.name === 'latest.yml');
+  if (yml) {
+    const buf = Buffer.from((await scarica(yml)).toString('utf8').split(asset.name).join(p.file));
+    const h = sha256(buf);
+    const ora = sito.assets.find(a => a.name === 'latest.yml');
+    if (!ora || ora.digest !== `sha256:${h}`) {
+      await carica(sito, 'latest.yml', buf, h);
+      console.log(`+ ${p.nome.padEnd(22)} latest.yml per l'aggiornamento automatico`);
+    }
+  }
 
-  const info = {
-    name: `${p.nome} ${versione}`,
-    body: `Ultima versione di **${p.nome}**: ${versione}, pubblicata il ${data(rel.published_at)}.\n\n` +
-      `Il file si chiama sempre \`${p.file}\`, così il link del sito non cambia; a ogni nuova versione viene ` +
-      `sostituito da solo.\n\nSHA-256: \`${hash}\``,
-    make_latest: 'false'
+  // la descrizione dei repository -releases ("Solo gli installer di…") non dice cosa fa il programma: si lascia vuota
+  const descr = ((await api(LEGGE, `/repos/${OWNER}/${p.repo}`)).description || '').trim();
+  return {
+    id: p.tag, name: p.nome, repo: `${OWNER}/${p.repo}`, description: /^solo gli installer/i.test(descr) ? '' : descr,
+    version: versione, tag: rel.tag_name, publishedAt: rel.published_at, notes: rel.body || '',
+    file: { name: asset.name, url: urlDelSito(p.tag, p.file), size, sha256: hash }
   };
-  if (!sito) {
-    sito = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases`, {
-      method: 'POST', body: JSON.stringify({ tag_name: p.tag, target_commitish: 'main', ...info })
+}
+
+/**
+ * Il catalogo che legge PRO Launcher (senza token): per ogni programma versione, note e installer sul sito.
+ * Sta nella release "catalogo" di questo repository, sempre con lo stesso nome. Si riscrive solo se cambia.
+ */
+async function scriviCatalogo(voci) {
+  const CATALOGO = 'catalogo', FILE = 'programmi.json';
+  let rel = await releaseDelSito(CATALOGO);
+  const vecchio = rel && rel.assets.find(a => a.name === FILE);
+  let prima = null;
+  if (vecchio) {
+    try { prima = await (await fetch(urlDelSito(CATALOGO, FILE))).json(); } catch { /* catalogo illeggibile: si riscrive */ }
+  }
+  // un programma che stavolta non si è potuto leggere tiene la voce di prima, che punta ancora a un file valido
+  const tutte = PROGRAMMI.map(p => voci[p.tag] || (prima && (prima.programs || []).find(x => x.id === p.tag))).filter(Boolean);
+  if (prima && JSON.stringify(prima.programs) === JSON.stringify(tutte)) {
+    console.log(`= catalogo ${FILE} già aggiornato`);
+    return;
+  }
+  const buf = Buffer.from(JSON.stringify({ version: 1, updatedAt: new Date().toISOString(), programs: tutte }, null, 2) + '\n');
+  if (!rel) {
+    rel = await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases`, {
+      method: 'POST', body: JSON.stringify({
+        tag_name: CATALOGO, target_commitish: 'main', name: 'Catalogo dei programmi', make_latest: 'false',
+        body: `\`${FILE}\`: per ogni programma l'ultima versione, le note e l'installer su questo sito, con lo SHA-256. ` +
+          'Lo legge PRO Launcher per sapere cosa c\'è di nuovo, senza token. Si aggiorna da solo insieme agli installer.'
+      })
     });
   }
-  // Si carica con un nome provvisorio e poi si rinomina: il link resta senza file solo per un attimo.
-  const provvisorio = `${p.file}.nuovo`;
-  for (const a of sito.assets) if (a.name !== p.file) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${a.id}`, { method: 'DELETE' });
-  const nuovo = await api(SCRIVE, `https://uploads.github.com/repos/${OWNER}/${SITO}/releases/${sito.id}/assets?name=${encodeURIComponent(provvisorio)}`, {
-    method: 'POST', body: buf, headers: { 'Content-Type': 'application/octet-stream' }
-  });
-  if (nuovo.digest && nuovo.digest !== `sha256:${hash}`) throw new Error(`${p.file}: il file caricato non corrisponde`);
-  if (presente) await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${presente.id}`, { method: 'DELETE' });
-  await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/assets/${nuovo.id}`, { method: 'PATCH', body: JSON.stringify({ name: p.file }) });
-  await api(SCRIVE, `/repos/${OWNER}/${SITO}/releases/${sito.id}`, { method: 'PATCH', body: JSON.stringify(info) });
-  console.log(`+ ${p.nome.padEnd(22)} ${versione} pubblicata (${(buf.length / 1e6).toFixed(0)} MB, SHA-256 verificato)`);
-  return true;
+  await carica(rel, FILE, buf, sha256(buf));
+  console.log(`+ catalogo ${FILE} aggiornato (${tutte.map(v => `${v.name} ${v.version}`).join(', ')})`);
 }
 
 (async () => {
   let errori = 0;
+  const voci = {};
   for (const p of PROGRAMMI) {
-    try { await aggiorna(p); } catch (e) { errori++; console.error(`! ${p.nome}: ${e.message}`); }
+    try { voci[p.tag] = await aggiorna(p); } catch (e) { errori++; console.error(`! ${p.nome}: ${e.message}`); }
   }
+  try { await scriviCatalogo(voci); } catch (e) { errori++; console.error(`! catalogo: ${e.message}`); }
   if (errori) process.exit(1);
 })();

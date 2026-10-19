@@ -26,10 +26,21 @@ programmi sono private). Ogni programma ha la sua release, con il tag uguale al 
 lo stesso nome, per esempio `releases/download/pro-launcher/PRO-Launcher-Setup.exe`: il link non cambia mai.
 `scarica.js` legge la versione dalle release e la scrive accanto al pulsante.
 
-A ogni nuova versione di un programma `strumenti/aggiorna-download.js` copia il suo Setup dalla release privata
-(verificato con lo SHA-256 di GitHub) al posto di quello vecchio; i file già uguali non li tocca.
+**PRO Launcher legge da qui, senza token.** La release `catalogo` contiene `programmi.json`: per ogni programma
+l'ultima versione, le note, il link dell'installer su questo sito e il suo SHA-256
+(`releases/download/catalogo/programmi.json`). PRO Launcher 1.1.0 e successivi lo leggono per sapere cosa c'è di
+nuovo e scaricano gli installer da qui; il launcher stesso si aggiorna con `releases/download/pro-launcher/latest.yml`
+(copiato dalla release privata con il nome fisso del file). Sono download normali, non domande alle API di GitHub:
+nessun token sui PC e nessun limite di 60 richieste all'ora.
 
-- **Da solo**: `.github/workflows/aggiorna-download.yml` lo lancia ogni 10 minuti. Serve il secret
+A ogni nuova versione di un programma `strumenti/aggiorna-download.js` copia il suo Setup dalla release privata
+(verificato con lo SHA-256 di GitHub) al posto di quello vecchio, poi riscrive `programmi.json`; i file già uguali
+non li tocca. Se un programma non si riesce a leggere, nel catalogo resta la sua voce di prima.
+
+**Dopo ogni pubblicazione** conviene lanciarlo subito (da qui sotto, "Subito, a mano"): il giro periodico è solo una
+riserva, perché GitHub può ritardare o saltare i workflow pianificati.
+
+- **Da solo**: `.github/workflows/aggiorna-download.yml` lo lancia ogni 10 minuti (ai minuti 4, 14, 24…). Serve il secret
   `RELEASES_TOKEN` (Settings › Secrets and variables › Actions): lo stesso token di sola lettura delle release che
   usa PRO Launcher. GitHub sospende i workflow pianificati dopo 60 giorni senza commit nel repository: se succede,
   si riattiva da Actions › Aggiorna i download › Enable workflow.
