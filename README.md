@@ -3,10 +3,10 @@
 Il sito che presenta i programmi: una pagina per ognuno (a cosa serve, cosa fa, dove si scarica) più l'indice
 con tutti.
 
-**Online:** https://andsnf-cpu.github.io/web-present-programs-client/
-
-Lo pubblica GitHub Pages dal ramo `main`: ogni modifica inviata a GitHub (push) va online da sola dopo circa
-un minuto. Sul computer le pagine si aprono anche con un doppio clic su `index.html`, senza server.
+**Non è online:** dal 20/10/2026 il repository è privato e GitHub Pages, con il piano gratuito, non pubblica i
+repository privati (prima era su https://andsnf-cpu.github.io/web-present-programs-client/). Le pagine si aprono
+con un doppio clic su `index.html`, senza server. Se il repository torna pubblico, va riattivato Pages
+(Settings › Pages › Deploy from a branch, `main`).
 
 | File | Contenuto |
 |---|---|
@@ -21,16 +21,19 @@ Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, c
 ## Download
 
 Gli installer dei programmi **non sono pubblici**: stanno nelle release private (`<programma>-releases`) e li
-scarica PRO Launcher con il token di sola lettura delle release, che l'amministratore inserisce la prima volta.
-Sulle schede dei programmi il pulsante porta a PRO Launcher.
+scarica PRO Launcher con il token di sola lettura delle release. Dalla 1.1.3 nei PC dell'ufficio il token arriva da
+solo dalla cartella di rete, dove l'amministratore lo condivide una volta dal launcher; altrimenti lo inserisce lui
+la prima volta. Sulle schede dei programmi il pulsante porta a PRO Launcher.
 
 Sul sito si scarica direttamente **solo PRO Launcher**, da [`pro-launcher-releases`](https://github.com/andsnf-cpu/pro-launcher-releases/releases/latest),
 l'unico repository di release pubblico (da solo, senza token, il launcher non mostra nessun programma). I pulsanti
 puntano alla pagina dell'ultima release; `scarica.js` chiede a GitHub l'ultima versione e li trasforma nel link
 diretto all'installer, con la versione accanto. Dopo una nuova versione del launcher non c'è niente da fare qui.
 
-La release `pro-launcher` di questo repository resta ferma alla 1.1.2: serve solo ai launcher 1.1.0 e 1.1.1, che si
-aggiornavano da lì, per arrivare alla 1.1.2, che si aggiorna da `pro-launcher-releases`. Non va cancellata.
+La release `pro-launcher` di questo repository resta ferma alla 1.1.2: serviva ai launcher 1.1.0 e 1.1.1, che si
+aggiornavano da lì, per arrivare alla 1.1.2, che si aggiorna da `pro-launcher-releases`. Con il repository privato
+quei launcher non la raggiungono più: si aggiornano a mano installando l'ultima versione da `pro-launcher-releases`.
+Non va cancellata: se il repository torna pubblico, riprende a funzionare.
 
 ## Aggiungere un tutorial
 
