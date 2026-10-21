@@ -3,10 +3,12 @@
 Il sito che presenta i programmi: una pagina per ognuno (a cosa serve, cosa fa, dove si scarica) più l'indice
 con tutti.
 
-**Non è online:** dal 20/10/2026 il repository è privato e GitHub Pages, con il piano gratuito, non pubblica i
-repository privati (prima era su https://andsnf-cpu.github.io/web-present-programs-client/). Le pagine si aprono
-con un doppio clic su `index.html`, senza server. Se il repository torna pubblico, va riattivato Pages
-(Settings › Pages › Deploy from a branch, `main`).
+**Online:** https://andsnf-cpu.github.io/web-present-programs-client/
+
+Lo pubblica GitHub Pages dal ramo `main` (Settings › Pages › Deploy from a branch, `main`, `/ (root)`): ogni
+modifica inviata a GitHub (push) va online da sola dopo circa un minuto. Con il piano gratuito Pages funziona solo
+se il repository è pubblico: se diventa privato il sito si spegne, e quando torna pubblico Pages va riattivato a
+mano. Sul computer le pagine si aprono anche con un doppio clic su `index.html`, senza server.
 
 | File | Contenuto |
 |---|---|
@@ -31,9 +33,8 @@ puntano alla pagina dell'ultima release; `scarica.js` chiede a GitHub l'ultima v
 diretto all'installer, con la versione accanto. Dopo una nuova versione del launcher non c'è niente da fare qui.
 
 La release `pro-launcher` di questo repository resta ferma alla 1.1.2: serviva ai launcher 1.1.0 e 1.1.1, che si
-aggiornavano da lì, per arrivare alla 1.1.2, che si aggiorna da `pro-launcher-releases`. Con il repository privato
-quei launcher non la raggiungono più: si aggiornano a mano installando l'ultima versione da `pro-launcher-releases`.
-Non va cancellata: se il repository torna pubblico, riprende a funzionare.
+aggiornavano da lì, per arrivare alla 1.1.2, che si aggiorna da `pro-launcher-releases`. Funziona solo finché il
+repository è pubblico; non va cancellata.
 
 ## Aggiungere un tutorial
 
