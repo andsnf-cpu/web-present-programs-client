@@ -13,10 +13,14 @@ mano. Sul computer le pagine si aprono anche con un doppio clic su `index.html`,
 | File | Contenuto |
 |---|---|
 | `index.html` | Tutti i programmi, con il consiglio di installare Borin Ecosystem |
-| `editor-pro.html`, `provision-tour-editor.html`, `qr-studio.html`, `borin-client-finder.html`, `borin-ecosystem.html` | La scheda di ogni programma |
+| `editor-pro.html`, `provision-tour-editor.html`, `qr-studio.html`, `borin-client-finder.html`, `borin-dub.html`, `checklist-ordini.html`, `borin-ecosystem.html` | La scheda di ogni programma |
 | `pro-launcher.html` | Rimanda a `borin-ecosystem.html` (PRO Launcher si chiama Borin Ecosystem dalla 1.3.0): i vecchi link continuano a funzionare |
 | `stile.css` | Lo stile comune, con tema chiaro e scuro automatico |
-| `img/` | Le icone dei programmi, prese dai loro repository |
+| `img/` | Le icone dei programmi, prese dai loro repository (Borin DUB e Checklist Ordini, dell'account WiiZexx, hanno la sigla e il colore che usano in Borin Ecosystem) |
+
+Il nome della scheda è quello del repository delle release senza `-releases` (per esempio `qr-studio.html` per
+`qr-studio-releases`, `borin-dub.html` per `WiiZexx/borin-dub`): così Borin Ecosystem la trova da solo e mostra
+**Apri pagina prodotto** nel menu ⋯ del programma.
 
 Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, come
 `style="--accent-l:#2F6E96; --accent-d:#6FB2DE"` (tema chiaro e tema scuro).
