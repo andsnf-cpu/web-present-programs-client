@@ -12,8 +12,9 @@ mano. Sul computer le pagine si aprono anche con un doppio clic su `index.html`,
 
 | File | Contenuto |
 |---|---|
-| `index.html` | Tutti i programmi, con il consiglio di installare PRO Launcher |
-| `editor-pro.html`, `provision-tour-editor.html`, `qr-studio.html`, `borin-client-finder.html`, `pro-launcher.html` | La scheda di ogni programma |
+| `index.html` | Tutti i programmi, con il consiglio di installare Borin Ecosystem |
+| `editor-pro.html`, `provision-tour-editor.html`, `qr-studio.html`, `borin-client-finder.html`, `borin-ecosystem.html` | La scheda di ogni programma |
+| `pro-launcher.html` | Rimanda a `borin-ecosystem.html` (PRO Launcher si chiama Borin Ecosystem dalla 1.3.0): i vecchi link continuano a funzionare |
 | `stile.css` | Lo stile comune, con tema chiaro e scuro automatico |
 | `img/` | Le icone dei programmi, prese dai loro repository |
 
@@ -23,11 +24,11 @@ Il colore di ogni scheda è quello dell'icona del programma: sta nel `<body>`, c
 ## Download
 
 Gli installer dei programmi **non sono pubblici**: stanno nelle release private (`<programma>-releases`) e li
-scarica PRO Launcher con il token di sola lettura delle release. Dalla 1.1.3 nei PC dell'ufficio il token arriva da
+scarica Borin Ecosystem con il token di sola lettura delle release. Dalla 1.1.3 nei PC dell'ufficio il token arriva da
 solo dalla cartella di rete, dove l'amministratore lo condivide una volta dal launcher; altrimenti lo inserisce lui
-la prima volta. Sulle schede dei programmi il pulsante porta a PRO Launcher.
+la prima volta. Sulle schede dei programmi il pulsante porta a Borin Ecosystem.
 
-Sul sito si scarica direttamente **solo PRO Launcher**, da [`pro-launcher-releases`](https://github.com/andsnf-cpu/pro-launcher-releases/releases/latest),
+Sul sito si scarica direttamente **solo Borin Ecosystem**, da [`pro-launcher-releases`](https://github.com/andsnf-cpu/pro-launcher-releases/releases/latest),
 l'unico repository di release pubblico (da solo, senza token, il launcher non mostra nessun programma). I pulsanti
 puntano alla pagina dell'ultima release; `scarica.js` chiede a GitHub l'ultima versione e li trasforma nel link
 diretto all'installer, con la versione accanto. Dopo una nuova versione del launcher non c'è niente da fare qui.

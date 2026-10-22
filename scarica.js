@@ -1,4 +1,4 @@
-// I pulsanti "Scarica" di PRO Launcher puntano alla pagina dell'ultima release di pro-launcher-releases (l'unico
+// I pulsanti "Scarica" di Borin Ecosystem puntano alla pagina dell'ultima release di pro-launcher-releases (l'unico
 // repository di release pubblico). Qui si chiede a GitHub l'ultima versione: il pulsante diventa il link diretto
 // all'installer e la versione si scrive accanto. Se GitHub non risponde, il pulsante apre la pagina della release.
 (async () => {

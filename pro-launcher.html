@@ -2,91 +2,13 @@
 <html lang="it">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>PRO Launcher</title>
-  <meta name="description" content="PRO Launcher: installa, aggiorna e apre tutti i programmi con un clic.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800&family=Red+Hat+Mono:wght@500&family=Red+Hat+Text:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="stile.css">
-  <script src="scarica.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Borin Ecosystem</title>
+  <!-- PRO Launcher ora si chiama Borin Ecosystem: il vecchio indirizzo porta alla pagina nuova -->
+  <meta http-equiv="refresh" content="0; url=borin-ecosystem.html">
+  <link rel="canonical" href="borin-ecosystem.html">
 </head>
-<body class="tinted" style="--accent-l:#A65A16; --accent-d:#F2A65A">
-  <header class="hero">
-    <div class="wrap">
-      <nav class="crumbs" aria-label="Percorso"><a href="index.html">← Tutti i programmi</a></nav>
-      <div class="hero-main">
-        <img class="app-icon" src="img/pro-launcher.png" alt="" width="128" height="128">
-        <div>
-          <h1>PRO Launcher</h1>
-          <p class="tagline">Tutti i programmi in una finestra: si installano e si aggiornano con un clic.</p>
-          <div class="hero-actions">
-            <a class="btn primary" data-scarica="pro-launcher" href="https://github.com/andsnf-cpu/pro-launcher-releases/releases/latest"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-5-5 5 5 5-5M5 20h14"/></svg>Scarica l'ultima versione</a>
-          </div>
-          <p class="note">Il pulsante scarica subito l'installer dell'ultima versione<span data-versione="pro-launcher"></span>. Nei PC dell'ufficio il token di accesso arriva da solo dalla rete; altrimenti lo inserisce l'amministratore al primo avvio. Poi il launcher si aggiorna da solo.</p>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main class="wrap page">
-    <section class="intro" aria-labelledby="a-cosa-serve">
-      <h2 id="a-cosa-serve">A cosa serve</h2>
-      <p>PRO Launcher è il punto di partenza: mostra tutti i programmi, li installa con un clic e avvisa quando esce una versione nuova. Così Editor PRO, Provision Tour Editor, QR Studio e Borin Client Finder restano sempre aggiornati, e i programmi nuovi compaiono da soli.</p>
-    </section>
-
-    <div class="cols">
-      <section aria-labelledby="cosa-puoi-fare">
-        <h2 id="cosa-puoi-fare">Cosa puoi fare</h2>
-        <ul class="features">
-          <li><strong>Installa con un clic.</strong> Sceglie da solo il file giusto per il computer e lo controlla con il checksum prima di installarlo.</li>
-          <li><strong>Aggiornamenti.</strong> Controlla all'avvio, ogni 5 minuti e quando apri la finestra: una versione nuova si vede pochi minuti dopo l'uscita. Avvisa con una notifica e non aggiorna un programma aperto senza chiedertelo.</li>
-          <li><strong>Programmi già installati.</strong> Li riconosce anche se li hai installati a mano, e ne legge la versione vera.</li>
-          <li><strong>Novità e versioni.</strong> Le note di rilascio di ogni programma; una versione precedente si reinstalla dall'elenco.</li>
-          <li><strong>Riferimenti.</strong> Programmi, pagine web e cartelle, anche di rete, da aprire con un clic.</li>
-          <li><strong>Script.</strong> Le automazioni di Photoshop e Cinema 4D dalle cartelle condivise: riconosce per quale programma è ogni script e lo avvia con ▶; quelli di Cinema 4D si installano nel programma con un clic.</li>
-          <li><strong>Area di notifica.</strong> I programmi installati e il controllo degli aggiornamenti dall'icona vicino all'orologio.</li>
-          <li><strong>Si aggiorna da solo.</strong> A ogni controllo guarda anche se c'è una versione nuova di PRO Launcher e chiede se aggiornare; con «Più tardi» resta l'avviso in alto.</li>
-        </ul>
-      </section>
-
-      <aside class="facts" aria-labelledby="in-breve">
-        <h2 id="in-breve">In breve</h2>
-        <dl>
-          <div><dt>Sistema</dt><dd>Windows</dd></div>
-          <div><dt>Installazione</dt><dd>Installer, che si aggiorna da solo, oppure versione portable</dd></div>
-          <div><dt>Token</dt><dd>Nei PC dell'ufficio arriva da solo dalla cartella di rete, dove l'amministratore lo condivide una volta (Impostazioni › Accesso a GitHub › «Condividi con gli altri PC»); per rinnovarlo basta condividerlo di nuovo. Altrimenti lo inserisce l'amministratore al primo avvio.</dd></div>
-          <div><dt>Impostazioni avanzate</dt><dd>Protette dalla password dell'amministratore</dd></div>
-        </dl>
-      </aside>
-    </div>
-
-    <section id="tutorial" aria-labelledby="tutorial-title">
-      <h2 id="tutorial-title">Tutorial</h2>
-      <!--
-        Per aggiungere un tutorial copia questo blocco dentro <ol class="tutorial-list"> qui sotto
-        (l'avviso "in arrivo" sparisce da solo appena c'è il primo tutorial):
-
-        <li><a href="tutorial/pro-launcher-primo-avvio.html">
-          <span class="t-title">Primo avvio</span>
-          <span class="t-desc">Installare PRO Launcher e il primo programma.</span>
-          <span class="t-meta">3 minuti</span>
-        </a></li>
-      -->
-      <ol class="tutorial-list"></ol>
-      <p class="tutorial-empty">I tutorial di PRO Launcher arriveranno qui: guide passo passo, dal primo avvio a riferimenti e script.</p>
-    </section>
-  </main>
-
-  <footer class="wrap site-foot">
-    <p>Altri programmi</p>
-    <nav aria-label="Altri programmi">
-      <a href="editor-pro.html">Editor PRO</a>
-      <a href="provision-tour-editor.html">Provision Tour Editor</a>
-      <a href="qr-studio.html">QR Studio</a>
-      <a href="borin-client-finder.html">Borin Client Finder</a>
-      <a href="index.html">Tutti i programmi</a>
-    </nav>
-  </footer>
+<body>
+  <p>PRO Launcher ora si chiama Borin Ecosystem: <a href="borin-ecosystem.html">vai alla pagina</a>.</p>
 </body>
 </html>
